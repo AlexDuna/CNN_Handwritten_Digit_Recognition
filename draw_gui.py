@@ -11,19 +11,25 @@ class CNN(nn.Module):
         super().__init__()
         # Convolutional part
         self.conv1 = nn.Conv2d(in_channels = 1, out_channels=24, kernel_size=3)
+        self.bn1 = nn.BatchNorm2d(24)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.conv2 = nn.Conv2d(in_channels = 24, out_channels=36, kernel_size=3)
 
+        self.conv2 = nn.Conv2d(in_channels = 24, out_channels=36, kernel_size=3)
+        self.bn2 = nn.BatchNorm2d(36)
+        
         # Fully connected part
         self.fc1 = nn.Linear(36 * 5 * 5, 128)
+        self.dropout = nn.Dropout(p=0.5)
         self.fc2 = nn.Linear(128,10)
 
     def forward(self, x):
         x = self.conv1(x)
+        x = self.bn1(x)
         x = F.relu(x)
         x = self.pool(x)
 
         x = self.conv2(x)
+        x = self.bn2(x)
         x = F.relu(x)
         x = self.pool(x)
 
@@ -31,6 +37,7 @@ class CNN(nn.Module):
 
         x = self.fc1(x)
         x = F.relu(x)
+        x = self.dropout(x)
         x = self.fc2(x)
         return x
 

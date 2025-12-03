@@ -5,6 +5,8 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 import torch.nn.functional as F
+from torchvision import transforms
+from torch.optim.lr_scheduler import StepLR
 
 # 1. Dataset and Dataloader
 # download training data from open datasets
@@ -12,7 +14,13 @@ train_dataset = datasets.MNIST(
     root="data",
     train=True,
     download=True,
-    transform=ToTensor()
+    transform=transforms.Compose([
+        transforms.RandomAffine(
+            degrees = 15,        # small rotations (+15, -15 degrees)
+            translate=(0.1, 0.1)  # small moves on x,y
+        ),
+        transforms.ToTensor()
+    ])
 )
 
 # download test data from open datasets
@@ -40,19 +48,25 @@ class CNN(nn.Module):
         super().__init__()
         # Convolutional part
         self.conv1 = nn.Conv2d(in_channels = 1, out_channels=24, kernel_size=3)
+        self.bn1 = nn.BatchNorm2d(24)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.conv2 = nn.Conv2d(in_channels = 24, out_channels=36, kernel_size=3)
 
+        self.conv2 = nn.Conv2d(in_channels = 24, out_channels=36, kernel_size=3)
+        self.bn2 = nn.BatchNorm2d(36)
+        
         # Fully connected part
         self.fc1 = nn.Linear(36 * 5 * 5, 128)
+        self.dropout = nn.Dropout(p=0.5)
         self.fc2 = nn.Linear(128,10)
 
     def forward(self, x):
         x = self.conv1(x)
+        x = self.bn1(x)
         x = F.relu(x)
         x = self.pool(x)
 
         x = self.conv2(x)
+        x = self.bn2(x)
         x = F.relu(x)
         x = self.pool(x)
 
@@ -60,6 +74,7 @@ class CNN(nn.Module):
 
         x = self.fc1(x)
         x = F.relu(x)
+        x = self.dropout(x)
         x = self.fc2(x)
         return x
 
@@ -67,14 +82,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = CNN().to(device)
 print(model)
 
-learning_rate = 0.001
-optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum = 0.9)
+learning_rate = 0.01
+optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum = 0.9, weight_decay=1e-4)
 loss_fn = nn.CrossEntropyLoss()
 
 
 # 3. Training loop
 EPOCHS = 30
 best_acc = 0.0
+scheduler = StepLR(optimizer, step_size=10, gamma = 0.1)
 
 for epoch in range(EPOCHS):
     model.train()
@@ -120,5 +136,7 @@ for epoch in range(EPOCHS):
             best_acc = test_acc
             torch.save(model.state_dict(), "mnist_cnn_best.pth")
             print(f"New best model saved with test acc ={best_acc: .4f}")
+
+    scheduler.step()
 
 
