@@ -88,7 +88,7 @@ loss_fn = nn.CrossEntropyLoss()
 
 
 # 3. Training loop
-EPOCHS = 30
+EPOCHS = 20
 best_acc = 0.0
 scheduler = StepLR(optimizer, step_size=10, gamma = 0.1)
 
