@@ -26,7 +26,6 @@ You can install the required libraries with:
 ### 3. Train the model:
 ```
   python ./train_mnist_dataset.py
-
 ```
 
 This will create a file that saves the best model (with the highest testing accuracy):
@@ -37,27 +36,26 @@ This will create a file that saves the best model (with the highest testing accu
 ### 4. Run the GUI:
 ```
   python ./draw_gui.py
-
 ```
 - After that, you can draw, and get predictions based on your drawings :)
 
 - The GUI should look like this:
 - Default:
-<img src="/Images/Default.png" alt="isolated"/>
+<img src="/images/Default.png" alt="isolated"/>
 
 - Prediction 1:
-<img src="/Images/Prediction1.png" alt="isolated"/>
+<img src="/images/Prediction1.png" alt="isolated"/>
 
 - Prediction 2:
-<img src="/Images/Prediction2.png" alt="isolated"/>
+<img src="/images/Prediction2.png" alt="isolated"/>
 
 
 
 # Model Architecture
-<img src="/Images/Representation.png" alt="isolated"/>
+<img src="/images/Representation.png" alt="isolated"/>
 
 ### Examples of MNIST dataset:
-<img src="/Images/MNIST_dataset.png" alt="isolated"/>
+<img src="/images/MNIST_dataset.png" alt="isolated"/>
 
 The CNN consists of:
   - **Conv2D(1 -> 24, kernel=3)** + BatchNorm + ReLU + MaxPool(2)
